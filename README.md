@@ -1,4 +1,4 @@
-Username: dtradke
+Username: dtradke, AGS
 
 This repository works towards the free square bounty question on the webpage https://www.notion.so/Analytics-Bounties-for-Alchemix-ffd6c25bdef3486c9b8dfa9476ac6a39. With this question, we are interested in understanding how the Alchemix (ALCX) Cryptocurrency price fluctuates with the top currencies in the market using data from Flipside Crypto and the CCI30 dataset.
 
