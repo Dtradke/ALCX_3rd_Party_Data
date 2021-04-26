@@ -40,7 +40,7 @@ def meanALCX(alcx_price):
     return np.array(mean_alcx)
 
 
-def plotCompare(mean_alcx, market_avg, diffs, window):
+def plotCompare(mean_alcx, market_avg, diffs, window,shift=0):
     fig = plt.figure(figsize=(10, 6))
     mean_diffs = np.mean(diffs)
     diffs = (diffs - np.amin(diffs)) / (np.amax(diffs) - np.amin(diffs))
@@ -51,53 +51,28 @@ def plotCompare(mean_alcx, market_avg, diffs, window):
     plt.plot(np.arange(market_avg.shape[0]), market_avg, c='g', label='CCI 30')
     plt.xlabel("Days Since Inception", fontsize=16)
     plt.ylabel("Normalized Price", fontsize=16)
-    plt.text(mean_alcx.shape[0]-10, 0.0, "Mean Diff: "+str(round(mean_diffs,1)), fontsize=15, bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
+    plt.text(mean_alcx.shape[0]-14, 0.0, "Mean Diff: "+str(round(mean_diffs/window,2)), fontsize=15, bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
-    plt.legend(fontsize=15)
-    plt.title("Dynamic Time Warping ("+str(window)+" day window) with CCI30 and ALCX Price", fontsize=18)
+    plt.legend(fontsize=15, loc='upper left')
+    if shift == 0:
+        plt.title("DTW ("+str(window)+" day window) with CCI30 and ALCX Price", fontsize=18)
+    else:
+        plt.title("DTW ("+str(window)+" day window) with CCI30 and ALCX Price ("+str(shift)+" day shift)", fontsize=18)
     plt.show()
 
-def doDTW(mean_alcx, market_avg, window=7):
+def doDTW(mean_alcx, market_avg, window=7,shift=0):
+    # shift is added to see if MARKET predicts ALCX price
     end = 0
     diffs = []
-    while end <= market_avg.size:
+    while (end+shift) <= market_avg.size:
         if (end-window) < 0:
             start = 0
         else:
             start = (end-window)
         focal = mean_alcx[start:end]
-        target = market_avg[start:end]
+        target = market_avg[start+shift:end+shift]
         d, path = fastdtw(focal, target, dist=euclidean)
         diffs.append(d)
         end+=1
     return np.array(diffs)
-
-#
-# path = "data/cci30_OHLCV.csv"
-# market_avg = loadMarketAvg(path)
-#
-#
-# url = 'https://api.flipsidecrypto.com/api/v2/queries/43f66ead-faf9-4f46-9bae-29760810d3b0/data/latest'
-# dataset = loadData(url)
-#
-# df = pd.DataFrame(dataset)
-# df = df.sort_values('HOUR')
-# alcx_price = np.array(df["PRICE"])[:-2]
-#
-#
-# mean_alcx = meanALCX(alcx_price)
-# market_avg = market_avg[(-1*mean_alcx.size):]
-#
-# # normalize
-# mean_alcx = (mean_alcx - np.amin(mean_alcx)) / (np.amax(mean_alcx) - np.amin(mean_alcx))
-# market_avg = (market_avg - np.amin(market_avg)) / (np.amax(market_avg) - np.amin(market_avg))
-#
-#
-# diffs = doDTW(mean_alcx, market_avg, window=7)
-#
-# plotCompare(mean_alcx, market_avg, diffs)
-#
-#
-# print(df)
-# exit()
